@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-openai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-openai
+  template:
+    metadata:
+      labels:
+        app: fastapi-openai
+    spec:
+      containers:
+      - name: fastapi-container
+        image: image-registry.openshift-image-registry.svc:5000/fastapi-init/fastapi-openai:latest
+        ports:
+        - containerPort: 8000

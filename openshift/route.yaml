@@ -1,0 +1,12 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: fastapi-openai
+spec:
+  to:
+    kind: Service
+    name: fastapi-openai
+  port:
+    targetPort: 8000
+  tls:
+    termination: edge

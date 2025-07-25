@@ -1,0 +1,17 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: fastapi-openai-build
+spec:
+  source:
+    type: Git
+    git:
+      uri: https://github.com/hadrian89/fastapi-openai.git
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: fastapi-openai:latest
