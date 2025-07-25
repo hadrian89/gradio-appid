@@ -1,11 +1,11 @@
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: fastapi-openai
+  name: gradio-appid
 spec:
   to:
     kind: Service
-    name: fastapi-openai
+    name: gradio-appid
   port:
     targetPort: 8000
   tls:

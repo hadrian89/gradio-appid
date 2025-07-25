@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fastapi-openai
+  name: gradio-appid
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: fastapi-openai
+      app: gradio-appid
   template:
     metadata:
       labels:
-        app: fastapi-openai
+        app: gradio-appid
     spec:
       containers:
       - name: fastapi-container
-        image: image-registry.openshift-image-registry.svc:5000/fastapi-init/fastapi-openai:latest
+        image: image-registry.openshift-image-registry.svc:5000/fastapi-init/gradio-appid:latest
         ports:
         - containerPort: 8000

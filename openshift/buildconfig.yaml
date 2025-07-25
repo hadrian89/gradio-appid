@@ -1,12 +1,12 @@
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
-  name: fastapi-openai-build
+  name: gradio-appid-build
 spec:
   source:
     type: Git
     git:
-      uri: https://github.com/hadrian89/fastapi-openai.git
+      uri: https://github.com/hadrian89/gradio-appid.git
   strategy:
     type: Docker
     dockerStrategy:
@@ -14,4 +14,4 @@ spec:
   output:
     to:
       kind: ImageStreamTag
-      name: fastapi-openai:latest
+      name: gradio-appid:latest

@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: fastapi-openai
+  name: gradio-appid
 spec:
   selector:
-    app: fastapi-openai
+    app: gradio-appid
   ports:
     - protocol: TCP
       port: 8000
