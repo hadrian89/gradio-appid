@@ -10,6 +10,7 @@ import requests
 
 from app.auth_provider import AppIDAuthProvider, auth_required
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 import gradio as gr
 
 
@@ -28,7 +29,16 @@ class AuthMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
     
 app = FastAPI()
-app.add_middleware(SessionMiddleware, secret_key=os.environ["SESSION_SECRET_KEY"], same_site="lax", https_only=True)
+# app.add_middleware(SessionMiddleware, secret_key=os.environ["SESSION_SECRET_KEY"], same_site="lax", https_only=True)
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.environ["SESSION_SECRET_KEY"],
+    same_site="lax",           # Ensures compatibility across domains
+    https_only=True,           # Critical for OpenShift (uses HTTPS)
+    max_age=3600,              # Session cookie expiry in seconds (1 hr)
+    session_cookie="session",  # Optional: customize name
+)
 app.add_middleware(AuthMiddleware)
 
 app.add_middleware(
@@ -38,6 +48,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(HTTPSRedirectMiddleware)
 
 @app.get("/afterauth")
 def after_auth(request: Request):
