@@ -67,6 +67,9 @@ def after_auth(request: Request):
     access_token = data["access_token"]
     email, user_id = AppIDAuthProvider._get_user_info(data["id_token"])
     roles_resp = AppIDAuthProvider._get_user_roles(user_id)
+    
+    print(user_id)
+    print(email)
 
     if "roles" in roles_resp:
         session[AppIDAuthProvider.APPID_USER_TOKEN] = access_token
@@ -103,6 +106,7 @@ demo = gr.Interface(fn=greet, inputs="text", outputs="text")
 @auth_required
 async def secure_data(request: Request):
     # Step 5: Mount Gradio app using Gradio's official helper
+    print(request.session)
     response = RedirectResponse(url="/gradio-app")
     response.set_cookie(key="auth_token", value="valid-token")
     return response
