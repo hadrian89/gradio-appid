@@ -7,7 +7,6 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from requests.auth import HTTPBasicAuth
 import requests
-import pprint 
 
 from app.auth_provider import AppIDAuthProvider, auth_required
 import gradio as gr
@@ -15,20 +14,8 @@ import gradio as gr
 
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        print("Request URLs:", request.url.path)
         if request.url.path.startswith("/gradio-app"):
             token = request.cookies.get("auth_token")
-            print("\n--- Incoming Request ---")
-            print("URL Path:", request.url.path)
-            print("Method:", request.method)
-            print("Headers:")
-            pprint.pprint(dict(request.headers))
-            print("Cookies:")
-            pprint.pprint(request.cookies)
-            print("Query Params:")
-            pprint.pprint(dict(request.query_params))
-            print("------------------------\n")
-            # print(request.session["APPID_USER_TOKEN"])
             if token != "valid-token":
                 return HTMLResponse(
                     content="""
@@ -69,9 +56,6 @@ def after_auth(request: Request):
     email, user_id = AppIDAuthProvider._get_user_info(data["id_token"])
     roles_resp = AppIDAuthProvider._get_user_roles(user_id)
     
-    print(user_id)
-    print(email)
-
     if "roles" in roles_resp:
         session[AppIDAuthProvider.APPID_USER_TOKEN] = access_token
         session[AppIDAuthProvider.APPID_USER_ROLES] = roles_resp["roles"]
@@ -107,9 +91,8 @@ demo = gr.Interface(fn=greet, inputs="text", outputs="text")
 @auth_required
 async def secure_data(request: Request):
     # Step 5: Mount Gradio app using Gradio's official helper
-    #print(request.session[AppIDAuthProvider.APPID_USER_TOKEN])
     response = RedirectResponse(url="/gradio-app")
-    #response.set_cookie(key="auth_token", value="valid-token")
+    response.set_cookie(key="auth_token", value="valid-token")
     return response
 
 gr.mount_gradio_app(app, demo, path="/gradio-app")
