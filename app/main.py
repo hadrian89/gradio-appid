@@ -7,9 +7,9 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from requests.auth import HTTPBasicAuth
 import requests
+import pprint 
 
 from app.auth_provider import AppIDAuthProvider, auth_required
-from fastapi.middleware.cors import CORSMiddleware
 import gradio as gr
 
 
@@ -17,6 +17,17 @@ class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         if request.url.path.startswith("/gradio-app"):
             token = request.cookies.get("auth_token")
+            print("\n--- Incoming Request ---")
+            print("URL Path:", request.url.path)
+            print("Method:", request.method)
+            print("Headers:")
+            pprint.pprint(dict(request.headers))
+            print("Cookies:")
+            pprint.pprint(request.cookies)
+            print("Query Params:")
+            pprint.pprint(dict(request.query_params))
+            print("------------------------\n")
+            # print(request.session["APPID_USER_TOKEN"])
             if token != "valid-token":
                 return HTMLResponse(
                     content="""
@@ -28,16 +39,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
     
 app = FastAPI()
-app.add_middleware(SessionMiddleware, secret_key=os.environ["SESSION_SECRET_KEY"], same_site="lax", https_only=True)
+app.add_middleware(SessionMiddleware, secret_key=os.environ["SESSION_SECRET_KEY"])
 app.add_middleware(AuthMiddleware)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # or better, your frontend domain
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 @app.get("/afterauth")
 def after_auth(request: Request):
@@ -100,15 +104,7 @@ demo = gr.Interface(fn=greet, inputs="text", outputs="text")
 async def secure_data(request: Request):
     # Step 5: Mount Gradio app using Gradio's official helper
     response = RedirectResponse(url="/gradio-app")
-    #response.set_cookie(key="auth_token", value="valid-token")
-    response.set_cookie(
-        key="auth_token", 
-        value="valid-token", 
-        secure=True,   # Set to True in production
-        httponly=True, 
-        samesite="Lax",
-        path="/"
-    )
+    response.set_cookie(key="auth_token", value="valid-token")
     return response
 
 gr.mount_gradio_app(app, demo, path="/gradio-app")
