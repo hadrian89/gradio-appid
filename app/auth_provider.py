@@ -99,20 +99,16 @@ def auth_required(endpoint_func):
     @wraps(endpoint_func)
     async def wrapper(request: Request, *args, **kwargs):
         auth_active, err_msg = AppIDAuthProvider._is_auth_active(request)
-        print("Auth Active:", auth_active)
-        print("Error Message:", err_msg)
         if not auth_active:
-            print("User is not authenticated")
             if err_msg:
                 return {"error": f"Internal error: {err_msg}"}
             else:
                 # Redirect to login page
                 return RedirectResponse(url="/login")
         else:
-            print("User has roles:", AppIDAuthProvider._user_has_a_role(request))
             if not AppIDAuthProvider._user_has_a_role(request):
-                return {"error": "Unauthorized!"}
+                # return {"error": "Unauthorized!"} allow all kind of roles or no roles
+                return await endpoint_func(request, *args, **kwargs)
             else:
-                print("User is authorized")
                 return await endpoint_func(request, *args, **kwargs)
     return wrapper
