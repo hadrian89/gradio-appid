@@ -92,7 +92,14 @@ demo = gr.Interface(fn=greet, inputs="text", outputs="text")
 async def secure_data(request: Request):
     # Step 5: Mount Gradio app using Gradio's official helper
     response = RedirectResponse(url="/gradio-app")
-    response.set_cookie(key="auth_token", value="valid-token")
+    #response.set_cookie(key="auth_token", value="valid-token")
+    response.set_cookie(
+        key="auth_token", 
+        value="valid-token", 
+        secure=True,   # Set to True in production
+        httponly=True, 
+        samesite="Lax"
+    )
     return response
 
 gr.mount_gradio_app(app, demo, path="/gradio-app")
