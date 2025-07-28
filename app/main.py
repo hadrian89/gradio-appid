@@ -15,6 +15,7 @@ import gradio as gr
 
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        print("Request URLs:", request.url.path)
         if request.url.path.startswith("/gradio-app"):
             token = request.cookies.get("auth_token")
             print("\n--- Incoming Request ---")
@@ -106,8 +107,8 @@ demo = gr.Interface(fn=greet, inputs="text", outputs="text")
 @auth_required
 async def secure_data(request: Request):
     # Step 5: Mount Gradio app using Gradio's official helper
-    print(request.session)
-    response = RedirectResponse(url="/gradio-app")
+    print(request.session[AppIDAuthProvider.APPID_USER_TOKEN])
+    response = RedirectResponse(url="/gradio-app", headers={"Authorization": request.session[AppIDAuthProvider.APPID_USER_TOKEN]})
     response.set_cookie(key="auth_token", value="valid-token")
     return response
 
