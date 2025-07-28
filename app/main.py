@@ -9,7 +9,7 @@ from requests.auth import HTTPBasicAuth
 import requests
 
 from app.auth_provider import AppIDAuthProvider, auth_required
-
+from fastapi.middleware.cors import CORSMiddleware
 import gradio as gr
 
 
@@ -28,8 +28,16 @@ class AuthMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
     
 app = FastAPI()
-app.add_middleware(SessionMiddleware, secret_key=os.environ["SESSION_SECRET_KEY"])
+app.add_middleware(SessionMiddleware, secret_key=os.environ["SESSION_SECRET_KEY"], same_site="lax", https_only=True)
 app.add_middleware(AuthMiddleware)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or better, your frontend domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/afterauth")
 def after_auth(request: Request):
@@ -98,7 +106,8 @@ async def secure_data(request: Request):
         value="valid-token", 
         secure=True,   # Set to True in production
         httponly=True, 
-        samesite="Lax"
+        samesite="Lax",
+        path="/"
     )
     return response
 
